@@ -1,0 +1,166 @@
+{
+  "usuarios": [
+    {
+      "id_usuario": 1,
+      "nombre": "María López",
+      "telefono": "50212345678",
+      "dpi": "1234567890101",
+      "rol": "productor",
+      "reputacion": 4.8,
+      "foto": "👩‍🌾"
+    },
+    {
+      "id_usuario": 2,
+      "nombre": "Juan Pérez",
+      "telefono": "50287654321",
+      "dpi": "9876543210101",
+      "rol": "comprador",
+      "reputacion": 4.5,
+      "foto": "👨‍🌾"
+    },
+    {
+      "id_usuario": 3,
+      "nombre": "Ana García",
+      "telefono": "50211112222",
+      "dpi": "1122334455667",
+      "rol": "productor",
+      "reputacion": 4.9,
+      "foto": "👩‍🌾"
+    }
+  ],
+  "categorias": [
+    { "id_categoria": 1, "nombre_categoria": "Verduras", "descripcion": "Verduras frescas de temporada", "icono": "🥦" },
+    { "id_categoria": 2, "nombre_categoria": "Frutas", "descripcion": "Frutas frescas y dulces", "icono": "🍎" },
+    { "id_categoria": 3, "nombre_categoria": "Granos", "descripcion": "Granos y cereales", "icono": "🌽" },
+    { "id_categoria": 4, "nombre_categoria": "Hierbas", "descripcion": "Hierbas y especias", "icono": "🌿" },
+    { "id_categoria": 5, "nombre_categoria": "Raíces", "descripcion": "Tubérculos y raíces", "icono": "🥕" }
+  ],
+  "productos": [
+    {
+      "id_producto": 1,
+      "nombre": "Tomates Frescos",
+      "imagen": "🍅",
+      "precio": 15.00,
+      "cantidad": 50,
+      "id_categoria": 1,
+      "id_usuario": 1,
+      "descripcion": "Tomates maduros del día"
+    },
+    {
+      "id_producto": 2,
+      "nombre": "Maíz Amarillo",
+      "imagen": "🌽",
+      "precio": 8.50,
+      "cantidad": 200,
+      "id_categoria": 3,
+      "id_usuario": 1,
+      "descripcion": "Maíz cosechado esta semana"
+    },
+    {
+      "id_producto": 3,
+      "nombre": "Aguacate Hass",
+      "imagen": "🥑",
+      "precio": 25.00,
+      "cantidad": 30,
+      "id_categoria": 2,
+      "id_usuario": 3,
+      "descripcion": "Aguacates cremosos y maduros"
+    },
+    {
+      "id_producto": 4,
+      "nombre": "Zanahorias",
+      "imagen": "🥕",
+      "precio": 10.00,
+      "cantidad": 80,
+      "id_categoria": 5,
+      "id_usuario": 3,
+      "descripcion": "Zanahorias frescas y crujientes"
+    },
+    {
+      "id_producto": 5,
+      "nombre": "Cilantro Fresco",
+      "imagen": "🌿",
+      "precio": 5.00,
+      "cantidad": 100,
+      "id_categoria": 4,
+      "id_usuario": 1,
+      "descripcion": "Cilantro aromático del huerto"
+    },
+    {
+      "id_producto": 6,
+      "nombre": "Manzanas Rojas",
+      "imagen": "🍎",
+      "precio": 20.00,
+      "cantidad": 60,
+      "id_categoria": 2,
+      "id_usuario": 3,
+      "descripcion": "Manzanas dulces y crujientes"
+    },
+    {
+      "id_producto": 7,
+      "nombre": "Frijoles Negros",
+      "imagen": "🫘",
+      "precio": 12.00,
+      "cantidad": 150,
+      "id_categoria": 3,
+      "id_usuario": 1,
+      "descripcion": "Frijoles orgánicos de calidad"
+    },
+    {
+      "id_producto": 8,
+      "nombre": "Brócoli Verde",
+      "imagen": "🥦",
+      "precio": 18.00,
+      "cantidad": 40,
+      "id_categoria": 1,
+      "id_usuario": 3,
+      "descripcion": "Brócoli fresco y nutritivo"
+    }
+  ],
+  "pedidos": [
+    {
+      "id_pedido": 1,
+      "fecha": "2026-05-10",
+      "estado": "Entregado",
+      "id_usuario": 2,
+      "id_producto": 1,
+      "cantidad_pedida": 5
+    },
+    {
+      "id_pedido": 2,
+      "fecha": "2026-05-15",
+      "estado": "Aceptado",
+      "id_usuario": 2,
+      "id_producto": 3,
+      "cantidad_pedida": 3
+    },
+    {
+      "id_pedido": 3,
+      "fecha": "2026-05-18",
+      "estado": "Pendiente",
+      "id_usuario": 2,
+      "id_producto": 6,
+      "cantidad_pedida": 10
+    }
+  ],
+  "calificaciones": [
+    {
+      "id_calificacion": 1,
+      "puntuacion": 5,
+      "comentario": "Excelente productor, muy puntual",
+      "id_usuario": 1
+    },
+    {
+      "id_calificacion": 2,
+      "puntuacion": 4,
+      "comentario": "Buenos productos, frescura garantizada",
+      "id_usuario": 1
+    },
+    {
+      "id_calificacion": 3,
+      "puntuacion": 5,
+      "comentario": "Muy buena atención",
+      "id_usuario": 3
+    }
+  ]
+}

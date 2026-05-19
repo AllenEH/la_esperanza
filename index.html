@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#2d6a4f" />
+  <meta name="description" content="Sistema de Gestión y Comercialización La Esperanza - Comunidad Agrícola" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>La Esperanza 🌱</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Preconnect para Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+
+<!-- ============================================================
+     APP SHELL
+     ============================================================ -->
+<div id="app">
+
+  <!-- ==========================================
+       PANTALLA 1: LOGIN / INGRESO
+       ========================================== -->
+  <section id="screen-login" class="screen">
+    <div class="login-header">
+      <div class="logo-container">
+        <div class="logo-icon">🌾</div>
+        <div class="logo-text">La Esperanza</div>
+        <div class="logo-subtitle">Comunidad Agrícola</div>
+      </div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-title">¡Bienvenido! 👋</div>
+      <div class="login-subtitle">Ingresa con tu número de teléfono</div>
+
+      <!-- Número telefónico -->
+      <div class="input-group">
+        <div class="input-label">
+          <span class="icon">📱</span> Número de Teléfono
+        </div>
+        <input
+          id="tel-input"
+          type="tel"
+          class="input-field"
+          placeholder="502 1234-5678"
+          inputmode="numeric"
+          maxlength="15"
+        />
+      </div>
+
+      <!-- Código SMS -->
+      <div class="input-group">
+        <div class="input-label">
+          <span class="icon">🔐</span> Código SMS
+        </div>
+        <div class="sms-row">
+          <input
+            id="codigo-input"
+            type="number"
+            class="input-field"
+            placeholder="- - - -"
+            inputmode="numeric"
+            maxlength="6"
+          />
+          <button class="btn-sms" onclick="enviarSMS()">📨 Enviar</button>
+        </div>
+      </div>
+
+      <!-- Botón Ingresar -->
+      <button class="btn-primary btn-icon" onclick="iniciarSesion()">
+        🌱 Ingresar al Sistema
+      </button>
+
+      <!-- Botón Registrarse -->
+      <button class="btn-secondary btn-icon" onclick="mostrarPantalla('registro')">
+        ✍️ Registrarse
+      </button>
+
+      <!-- Demo hint -->
+      <p style="text-align:center;margin-top:18px;font-size:12px;color:#94a3b8;font-weight:600;">
+        💡 Demo: Cualquier teléfono · Código: <strong>1234</strong>
+      </p>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       PANTALLA 2: REGISTRO
+       ========================================== -->
+  <section id="screen-registro" class="screen">
+    <div class="register-header">
+      <div class="logo-container">
+        <div class="logo-icon" style="background:rgba(255,255,255,0.4);border-color:rgba(255,255,255,0.6)">🌾</div>
+        <div class="logo-text" style="color:#1e3a2f">La Esperanza</div>
+        <div class="logo-subtitle" style="color:#374151">CREAR CUENTA</div>
+      </div>
+    </div>
+
+    <div class="register-card">
+      <div class="login-title">Nueva Cuenta 🌱</div>
+      <div class="login-subtitle">Únete a la comunidad agrícola</div>
+
+      <div class="input-group">
+        <div class="input-label"><span class="icon">👤</span> Nombre Completo</div>
+        <input id="reg-nombre" type="text" class="input-field" placeholder="María García López" />
+      </div>
+
+      <div class="input-group">
+        <div class="input-label"><span class="icon">📱</span> Teléfono</div>
+        <input id="reg-tel" type="tel" class="input-field" placeholder="502 1234-5678" inputmode="numeric" />
+      </div>
+
+      <div class="input-group">
+        <div class="input-label"><span class="icon">🪪</span> DPI / CUI</div>
+        <input id="reg-dpi" type="number" class="input-field" placeholder="1234567890101" inputmode="numeric" />
+      </div>
+
+      <div class="input-group">
+        <div class="input-label"><span class="icon">🎭</span> Tipo de Usuario</div>
+        <select id="reg-rol" class="select-field">
+          <option value="comprador">🛒 Comprador</option>
+          <option value="productor">🌱 Productor</option>
+        </select>
+      </div>
+
+      <button class="btn-primary btn-amarillo btn-icon" onclick="registrarUsuario()">
+        🎉 Crear mi Cuenta
+      </button>
+
+      <button class="btn-secondary" onclick="mostrarPantalla('login')">
+        ← Volver al Ingreso
+      </button>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       PANTALLA 3: MENÚ PRINCIPAL / HOME
+       ========================================== -->
+  <section id="screen-home" class="screen">
+    <div class="screen-header">
+      <div class="header-row">
+        <div>
+          <div class="header-greeting">Hola, <span id="home-nombre">Amigo</span> 👋</div>
+          <div class="header-title">La Esperanza 🌾</div>
+          <div class="header-subtitle">Mercado Agrícola Comunitario</div>
+        </div>
+        <button class="header-icon-btn" onclick="navegarA('perfil')" title="Mi perfil">👤</button>
+      </div>
+    </div>
+
+    <div class="home-content">
+
+      <!-- Estadísticas rápidas -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">🌱</div>
+          <div class="stat-value" id="stat-productos">0</div>
+          <div class="stat-label">Productos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div class="stat-value" id="stat-pedidos">0</div>
+          <div class="stat-label">Pedidos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">👨‍🌾</div>
+          <div class="stat-value" id="stat-productores">0</div>
+          <div class="stat-label">Productores</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏷️</div>
+          <div class="stat-value" id="stat-categorias">0</div>
+          <div class="stat-label">Categorías</div>
+        </div>
+      </div>
+
+      <!-- Menú principal -->
+      <div class="section-title">
+        <span class="icon">🧭</span> ¿Qué deseas hacer?
+      </div>
+
+      <div class="menu-grid">
+        <!-- Catálogo - destacado -->
+        <div class="menu-card destacado" onclick="navegarA('catalogo')">
+          <div class="menu-card-icon">🛒</div>
+          <div>
+            <div class="menu-card-label">Ver Productos</div>
+            <div class="menu-card-desc">Explora y solicita productos frescos</div>
+          </div>
+        </div>
+
+        <div class="menu-card" onclick="navegarA('publicar')">
+          <div class="menu-card-icon">📤</div>
+          <div class="menu-card-label">Publicar</div>
+          <div class="menu-card-desc">Agrega tu cosecha</div>
+        </div>
+
+        <div class="menu-card" onclick="navegarA('historial')">
+          <div class="menu-card-icon">📋</div>
+          <div class="menu-card-label">Historial</div>
+          <div class="menu-card-desc">Mis pedidos</div>
+        </div>
+
+        <div class="menu-card" onclick="navegarA('perfil')">
+          <div class="menu-card-icon">👤</div>
+          <div class="menu-card-label">Mi Perfil</div>
+          <div class="menu-card-desc">Información personal</div>
+        </div>
+
+        <div class="menu-card" onclick="mostrarToast('📢 Próximamente: Notificaciones')">
+          <div class="menu-card-icon">🔔</div>
+          <div class="menu-card-label">Avisos</div>
+          <div class="menu-card-desc">Notificaciones</div>
+        </div>
+      </div>
+
+      <!-- Botón cerrar sesión -->
+      <button class="btn-secondary" onclick="cerrarSesion()" style="margin-top:8px;">
+        🚪 Cerrar Sesión
+      </button>
+
+    </div>
+  </section>
+
+  <!-- ==========================================
+       PANTALLA 4: CATÁLOGO DE PRODUCTOS
+       ========================================== -->
+  <section id="screen-catalogo" class="screen">
+    <div class="screen-header" style="padding-bottom:20px">
+      <div class="header-row">
+        <div>
+          <div class="header-title">Catálogo 🛒</div>
+          <div class="header-subtitle">Productos frescos disponibles</div>
+        </div>
+        <button class="header-icon-btn" onclick="navegarA('publicar')" title="Publicar producto">➕</button>
+      </div>
+    </div>
+
+    <div class="catalog-content">
+      <!-- Búsqueda -->
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input
+            type="search"
+            class="search-input"
+            placeholder="Buscar productos..."
+            oninput="buscarProducto(this.value)"
+          />
+        </div>
+      </div>
+
+      <!-- Filtros por categoría -->
+      <div class="category-filters" id="filtros-categorias">
+        <!-- Generado por JS -->
+      </div>
+
+      <!-- Grid de productos -->
+      <div class="products-grid" id="products-grid">
+        <!-- Generado por JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       PANTALLA 5: PUBLICAR PRODUCTO
+       ========================================== -->
+  <section id="screen-publicar" class="screen">
+    <div class="screen-header" style="padding-bottom:20px">
+      <div class="header-row">
+        <div>
+          <div class="header-title">Publicar 📤</div>
+          <div class="header-subtitle">Comparte tu cosecha</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="publish-content">
+
+      <!-- Área de foto -->
+      <div class="photo-upload-area" onclick="simularSubirFoto()">
+        <span id="preview-icon" class="upload-icon">📸</span>
+        <div id="upload-texts">
+          <div class="upload-text">Toca para agregar foto</div>
+          <div class="upload-subtext">Muestra tu producto 🌱</div>
+        </div>
+      </div>
+
+      <!-- Formulario -->
+      <div class="form-card">
+
+        <div class="input-group">
+          <div class="input-label"><span class="icon">🌾</span> Nombre del Producto</div>
+          <input id="pub-nombre" type="text" class="input-field" placeholder="Ej: Tomates frescos" />
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="input-group">
+            <div class="input-label"><span class="icon">💰</span> Precio (Q)</div>
+            <input id="pub-precio" type="number" class="input-field" placeholder="15.00" inputmode="decimal" min="0" step="0.50" />
+          </div>
+          <div class="input-group">
+            <div class="input-label"><span class="icon">📦</span> Cantidad</div>
+            <input id="pub-cantidad" type="number" class="input-field" placeholder="50" inputmode="numeric" min="1" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label"><span class="icon">🏷️</span> Categoría</div>
+          <select id="pub-categoria" class="select-field">
+            <option value="">Selecciona una categoría</option>
+          </select>
+        </div>
+
+      </div>
+
+      <button class="btn-primary btn-icon" onclick="publicarProducto()">
+        🌱 Publicar Producto
+      </button>
+
+    </div>
+  </section>
+
+  <!-- ==========================================
+       PANTALLA 6: HISTORIAL DE PEDIDOS
+       ========================================== -->
+  <section id="screen-historial" class="screen">
+    <div class="screen-header" style="padding-bottom:20px">
+      <div class="header-row">
+        <div>
+          <div class="header-title">Historial 📋</div>
+          <div class="header-subtitle">Mis pedidos realizados</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leyenda de estados -->
+    <div style="display:flex;gap:8px;overflow-x:auto;padding:14px 16px 0;scrollbar-width:none">
+      <span class="status-badge pendiente">⏳ Pendiente</span>
+      <span class="status-badge aceptado">✅ Aceptado</span>
+      <span class="status-badge rechazado">❌ Rechazado</span>
+      <span class="status-badge entregado">📦 Entregado</span>
+    </div>
+
+    <div class="historial-content">
+      <div id="historial-lista">
+        <!-- Generado por JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       PANTALLA 7: PERFIL
+       ========================================== -->
+  <section id="screen-perfil" class="screen">
+    <div class="screen-header" style="padding-bottom:20px">
+      <div class="header-row">
+        <div>
+          <div class="header-title">Mi Perfil 👤</div>
+          <div class="header-subtitle">Información personal</div>
+        </div>
+        <button class="header-icon-btn" onclick="cerrarSesion()" title="Cerrar sesión">🚪</button>
+      </div>
+    </div>
+
+    <div class="profile-content">
+
+      <!-- Hero del perfil -->
+      <div class="profile-hero">
+        <div class="profile-avatar" id="perfil-avatar">👤</div>
+        <div class="profile-name" id="perfil-nombre">Mi Nombre</div>
+        <div class="profile-role" id="perfil-rol-badge">🛒 Comprador</div>
+
+        <!-- Calificación -->
+        <div class="stars-row">
+          <div id="perfil-estrellas" style="display:flex;gap:2px">
+            <span class="star filled">⭐</span>
+            <span class="star filled">⭐</span>
+            <span class="star filled">⭐</span>
+            <span class="star filled">⭐</span>
+            <span class="star filled">⭐</span>
+          </div>
+          <span class="rating-value" id="perfil-rating-value">5.0</span>
+        </div>
+      </div>
+
+      <!-- Tarjetas de información -->
+      <div class="profile-cards">
+
+        <div class="info-card">
+          <div class="info-card-icon">📱</div>
+          <div>
+            <div class="info-card-label">Teléfono</div>
+            <div class="info-card-value" id="perfil-tel">---</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-icon">🪪</div>
+          <div>
+            <div class="info-card-label">DPI / CUI</div>
+            <div class="info-card-value" id="perfil-dpi">****</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-icon">🌱</div>
+          <div>
+            <div class="info-card-label">Productos Publicados</div>
+            <div class="info-card-value" id="perfil-productos">0 publicados</div>
+          </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div style="margin-top:8px">
+          <button class="btn-primary btn-icon" onclick="navegarA('publicar')">
+            📤 Publicar Nuevo Producto
+          </button>
+          <button class="btn-secondary btn-icon" style="margin-top:12px" onclick="navegarA('historial')">
+            📋 Ver Mis Pedidos
+          </button>
+          <button class="btn-secondary" onclick="cerrarSesion()" style="margin-top:12px;color:#ef4444;border-color:#ef4444">
+            🚪 Cerrar Sesión
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       NAVEGACIÓN INFERIOR
+       ========================================== -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="nav-item" data-nav="home" onclick="navegarA('home')">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Inicio</span>
+    </button>
+    <button class="nav-item" data-nav="catalogo" onclick="navegarA('catalogo')">
+      <span class="nav-icon">🛒</span>
+      <span class="nav-label">Catálogo</span>
+    </button>
+    <button class="nav-item" data-nav="publicar" onclick="navegarA('publicar')">
+      <span class="nav-icon">➕</span>
+      <span class="nav-label">Publicar</span>
+    </button>
+    <button class="nav-item" data-nav="historial" onclick="navegarA('historial')">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Historial</span>
+    </button>
+    <button class="nav-item" data-nav="perfil" onclick="navegarA('perfil')">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Perfil</span>
+    </button>
+  </nav>
+
+  <!-- ==========================================
+       MODAL: DETALLE DE PRODUCTO / SOLICITAR
+       ========================================== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+
+      <div class="modal-emoji" id="modal-emoji">🌾</div>
+      <div class="modal-title" id="modal-title">Producto</div>
+      <div class="modal-price" id="modal-price">Q 0.00</div>
+      <div class="modal-desc" id="modal-desc">Descripción del producto</div>
+
+      <div style="text-align:center;margin-bottom:14px">
+        <span class="price-tag" id="modal-cat">🏷️ Categoría</span>
+      </div>
+
+      <!-- Selector de cantidad -->
+      <div class="qty-selector">
+        <button class="qty-btn" onclick="cambiarCantidad(-1)">−</button>
+        <div class="qty-value" id="modal-qty-value">1</div>
+        <button class="qty-btn" onclick="cambiarCantidad(1)">+</button>
+      </div>
+
+      <button class="btn-primary btn-icon" onclick="confirmarPedido()">
+        ✅ Confirmar Pedido
+      </button>
+
+      <button class="btn-secondary" onclick="cerrarModal()" style="margin-top:10px">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast de notificaciones -->
+  <div class="toast" id="toast">✅ Mensaje</div>
+
+</div><!-- /#app -->
+
+<script src="js/app.js"></script>
+</body>
+</html>
