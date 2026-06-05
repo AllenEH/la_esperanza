@@ -180,6 +180,8 @@ public class ProductoService {
             .imagen(producto.getImagen())
             .descripcion(producto.getDescripcion())
             .nombreCategoria(producto.getCategoria().getNombreCategoria())
+            .idCategoria(producto.getCategoria().getIdCategoria())
+            .idUsuario(producto.getUsuario().getIdUsuario())
             .nombreUsuario(producto.getUsuario().getNombre())
             .fechaPublicacion(producto.getFechaPublicacion())
             .disponible(producto.getDisponible())

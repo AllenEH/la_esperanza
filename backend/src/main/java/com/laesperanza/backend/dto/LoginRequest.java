@@ -149,6 +149,8 @@ class ProductoResponse {
     private String imagen;
     private String descripcion;
     private String nombreCategoria;
+    private Long idCategoria;
+    private Long idUsuario;
     private String nombreUsuario;
     private java.time.LocalDateTime fechaPublicacion;
     private Boolean disponible;
@@ -163,11 +165,32 @@ class ProductoResponse {
 @Builder
 class PedidoResponse {
     private Long idPedido;
+    private Long idUsuario;
+    private Long idProducto;
     private String nombreProducto;
     private Integer cantidadPedida;
     private String estado;
     private java.time.LocalDateTime fechaPedido;
     private java.time.LocalDateTime fechaEntrega;
+    private String comentario;
+}
+
+/**
+ * DTO para respuesta de Calificación
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+class CalificacionResponse {
+    private Long idCalificacion;
+    private Integer puntuacion;
+    private String comentario;
+    private java.time.LocalDateTime fechaCalificacion;
+    private Long idUsuario;
+    private Long idCalificador;
+    private String nombreUsuario;
+    private String nombreCalificador;
 }
 
 /**

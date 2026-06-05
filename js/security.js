@@ -131,7 +131,7 @@ function validarProducto(producto) {
   }
   
   // Categoría
-  if (!producto.id_categoria || producto.id_categoria < 1) {
+  if (!producto.idCategoria || producto.idCategoria < 1) {
     errores.push('Selecciona una categoría válida');
   }
   
@@ -193,9 +193,11 @@ const SessionManager = {
   setToken(token, expiresIn = 1800) {
     const expirationTime = Date.now() + (expiresIn * 1000);
     
-    // Usar SessionStorage en vez de LocalStorage (más seguro)
+    // Guardar tanto en SessionStorage como en LocalStorage para recuperación entre pestañas
     sessionStorage.setItem('auth_token', token);
     sessionStorage.setItem('auth_expires', expirationTime);
+    localStorage.setItem('token', token);
+    localStorage.setItem('token_expires', expirationTime);
     
     console.log(`[Security] Token guardado. Expira en ${expiresIn}s`);
   },
@@ -205,8 +207,13 @@ const SessionManager = {
    * @returns {string|null} Token si es válido, null si expiró
    */
   getToken() {
-    const token = sessionStorage.getItem('auth_token');
-    const expiresAt = parseInt(sessionStorage.getItem('auth_expires'));
+    const sessionToken = sessionStorage.getItem('auth_token');
+    const sessionExpires = parseInt(sessionStorage.getItem('auth_expires'));
+    const localToken = localStorage.getItem('token');
+    const localExpires = parseInt(localStorage.getItem('token_expires'));
+
+    const token = sessionToken || localToken;
+    const expiresAt = sessionExpires || localExpires;
     
     // Verificar expiración
     if (!token || !expiresAt) return null;
@@ -225,6 +232,8 @@ const SessionManager = {
   clearToken() {
     sessionStorage.removeItem('auth_token');
     sessionStorage.removeItem('auth_expires');
+    localStorage.removeItem('token');
+    localStorage.removeItem('token_expires');
     console.log('[Security] Sesión cerrada');
   },
   
