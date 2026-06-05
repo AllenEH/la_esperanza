@@ -88,24 +88,50 @@ function iniciarSesion() {
   const tel = document.getElementById('tel-input').value.trim();
   const codigo = document.getElementById('codigo-input').value.trim();
 
+  // ✅ VALIDACIONES DE SEGURIDAD
   if (!tel) {
     mostrarToast('📱 Ingresa tu número de teléfono', 'error');
+    AuditLog.registrar('LOGIN_FALLIDO', 'N/A', { razon: 'teléfono vacío' }, 'warning');
+    return;
+  }
+
+  if (!validarTelefono(tel)) {
+    mostrarToast('📱 Formato de teléfono inválido', 'error');
+    AuditLog.registrar('LOGIN_FALLIDO', 'N/A', { razon: 'teléfono inválido', tel: tel.substring(0, 3) + '***' }, 'warning');
+    return;
+  }
+
+  if (!codigo) {
+    mostrarToast('🔐 Ingresa el código SMS', 'error');
+    return;
+  }
+
+  if (!validarCodigoSMS(codigo)) {
+    mostrarToast('🔐 Código debe ser de 4-6 dígitos', 'error');
+    AuditLog.registrar('LOGIN_FALLIDO', 'N/A', { razon: 'código inválido' }, 'warning');
     return;
   }
 
   if (codigo !== '1234') {
-    mostrarToast('🔐 Código incorrecto. Usa: 1234', 'error');
+    mostrarToast('🔐 Código incorrecto. Usa: 1234 (demo)', 'error');
+    AuditLog.registrar('LOGIN_FALLIDO', 'N/A', { razon: 'código incorrecto' }, 'warning');
     return;
   }
 
-  // Buscar usuario o crear temporal
+  // ✅ BUSCAR Y AUTENTICAR
   let usuario = App.db.usuarios.find(u => u.telefono.includes(tel.replace(/\D/g,'')));
   if (!usuario) {
     usuario = { id_usuario: Date.now(), nombre: "Usuario Demo", telefono: tel, dpi: "0000000000000", rol: "comprador", reputacion: 4.0, foto: "👤" };
   }
 
+  // ✅ GUARDAR SESIÓN SEGURA
   App.usuarioActual = usuario;
+  const tokenDemo = btoa(JSON.stringify({ userId: usuario.id_usuario, iat: Math.floor(Date.now() / 1000) }));
+  SessionManager.setToken(tokenDemo, 1800); // 30 minutos
+  
   localStorage.setItem('la_esperanza_user', JSON.stringify(usuario));
+  
+  AuditLog.registrar('LOGIN_EXITOSO', usuario.id_usuario, { usuario: usuario.nombre, rol: usuario.rol }, 'info');
   mostrarToast('✅ ¡Bienvenido, ' + usuario.nombre.split(' ')[0] + '!');
   cargarHome();
   mostrarPantalla('home');
@@ -113,17 +139,27 @@ function iniciarSesion() {
 
 function enviarSMS() {
   const tel = document.getElementById('tel-input').value.trim();
+  
   if (!tel) {
     mostrarToast('📱 Ingresa tu número primero', 'error');
     return;
   }
+
+  if (!validarTelefono(tel)) {
+    mostrarToast('📱 Número de teléfono inválido', 'error');
+    return;
+  }
+
   mostrarToast('📨 Código enviado: 1234 (demo)');
   document.getElementById('codigo-input').value = '1234';
+  AuditLog.registrar('SMS_ENVIADO', 'N/A', { tel: tel.substring(0, 3) + '***' }, 'info');
 }
 
 function cerrarSesion() {
   App.usuarioActual = null;
+  SessionManager.clearToken();
   localStorage.removeItem('la_esperanza_user');
+  AuditLog.registrar('LOGOUT', 'N/A', {}, 'info');
   mostrarToast('👋 Sesión cerrada');
   mostrarPantalla('login');
 }
@@ -135,24 +171,47 @@ function registrarUsuario() {
   const dpi = document.getElementById('reg-dpi').value.trim();
   const rol = document.getElementById('reg-rol').value;
 
-  if (!nombre || !tel || !dpi) {
-    mostrarToast('⚠️ Completa todos los campos', 'error');
+  // ✅ VALIDACIONES
+  const datosUsuario = {
+    nombre: sanitizeHTML(nombre),
+    telefono: tel,
+    dpi,
+    rol
+  };
+
+  const validacion = validarUsuario(datosUsuario);
+  if (!validacion.valido) {
+    mostrarToast('⚠️ ' + validacion.errores[0], 'error');
+    AuditLog.registrar('REGISTRO_FALLIDO', 'N/A', { razon: validacion.errores[0] }, 'warning');
+    return;
+  }
+
+  // Verificar si usuario ya existe
+  if (App.db.usuarios.find(u => u.telefono.includes(tel.replace(/\D/g,'')))) {
+    mostrarToast('📱 Este teléfono ya está registrado', 'error');
+    AuditLog.registrar('REGISTRO_FALLIDO', 'N/A', { razon: 'teléfono duplicado' }, 'warning');
     return;
   }
 
   const nuevoUsuario = {
     id_usuario: Date.now(),
-    nombre,
+    nombre: datosUsuario.nombre,
     telefono: tel,
-    dpi,
-    rol,
+    dpi: dpi,
+    rol: rol,
     reputacion: 5.0,
     foto: rol === 'productor' ? '👩‍🌾' : '👤'
   };
 
   App.db.usuarios.push(nuevoUsuario);
   App.usuarioActual = nuevoUsuario;
+  
+  const tokenDemo = btoa(JSON.stringify({ userId: nuevoUsuario.id_usuario, iat: Math.floor(Date.now() / 1000) }));
+  SessionManager.setToken(tokenDemo, 1800);
+  
   localStorage.setItem('la_esperanza_user', JSON.stringify(nuevoUsuario));
+  
+  AuditLog.registrar('REGISTRO_EXITOSO', nuevoUsuario.id_usuario, { usuario: nuevoUsuario.nombre, rol }, 'info');
   mostrarToast('🎉 ¡Registro exitoso, ' + nombre.split(' ')[0] + '!');
   cargarHome();
   mostrarPantalla('home');
@@ -290,6 +349,12 @@ function cambiarCantidad(delta) {
 function confirmarPedido() {
   if (!App.carritoModal || !App.usuarioActual) return;
 
+  // ✅ VALIDAR PERMISO
+  if (!PermisoManager.tienePermiso(App.usuarioActual?.rol, 'comprar')) {
+    mostrarToast('❌ Solo compradores pueden hacer pedidos', 'error');
+    return;
+  }
+
   const { producto, cantidad } = App.carritoModal;
 
   const nuevoPedido = {
@@ -302,6 +367,8 @@ function confirmarPedido() {
   };
 
   App.db.pedidos.push(nuevoPedido);
+  AuditLog.registrar('PEDIDO_CREADO', App.usuarioActual.id_usuario, { producto: producto.nombre, cantidad }, 'info');
+  
   cerrarModal();
   mostrarToast(`✅ Pedido de ${cantidad} ${producto.nombre} enviado`);
   renderHistorial();
@@ -314,13 +381,26 @@ function publicarProducto() {
   const cantidad = parseInt(document.getElementById('pub-cantidad').value);
   const categoria = parseInt(document.getElementById('pub-categoria').value);
 
-  if (!nombre || isNaN(precio) || isNaN(cantidad) || !categoria) {
-    mostrarToast('⚠️ Completa todos los campos', 'error');
+  // ✅ VALIDAR PERMISO
+  if (!PermisoManager.tienePermiso(App.usuarioActual?.rol, 'publicar')) {
+    mostrarToast('❌ Solo productores pueden publicar', 'error');
+    AuditLog.registrar('PUBLICAR_FALLIDO', App.usuarioActual?.id_usuario, { razon: 'rol insuficiente' }, 'warning');
     return;
   }
 
-  if (precio <= 0 || cantidad <= 0) {
-    mostrarToast('⚠️ Precio y cantidad deben ser mayores a 0', 'error');
+  // ✅ VALIDAR DATOS
+  const productoValidar = {
+    nombre,
+    precio,
+    cantidad,
+    id_categoria: categoria,
+    descripcion: 'Producto fresco de la comunidad'
+  };
+
+  const validacion = validarProducto(productoValidar);
+  if (!validacion.valido) {
+    mostrarToast('⚠️ ' + validacion.errores[0], 'error');
+    AuditLog.registrar('PUBLICAR_FALLIDO', App.usuarioActual?.id_usuario, { razon: validacion.errores[0] }, 'warning');
     return;
   }
 
@@ -328,13 +408,13 @@ function publicarProducto() {
 
   const nuevoProducto = {
     id_producto: Date.now(),
-    nombre,
+    nombre: sanitizeHTML(nombre),
     imagen: emojis[categoria] || '🌾',
     precio,
     cantidad,
     id_categoria: categoria,
     id_usuario: App.usuarioActual?.id_usuario || 1,
-    descripcion: 'Producto fresco de la comunidad'
+    descripcion: sanitizeHTML('Producto fresco de la comunidad')
   };
 
   App.db.productos.push(nuevoProducto);
@@ -347,6 +427,7 @@ function publicarProducto() {
   document.getElementById('preview-icon').textContent = '📸';
   document.getElementById('upload-texts').style.display = '';
 
+  AuditLog.registrar('PRODUCTO_PUBLICADO', App.usuarioActual?.id_usuario, { producto: nuevoProducto.nombre, precio, cantidad }, 'info');
   mostrarToast('🌱 ¡Producto publicado exitosamente!');
   renderProductos();
   mostrarPantalla('catalogo');
@@ -475,20 +556,37 @@ function mostrarToast(mensaje, tipo = 'success') {
 
 // ---- INICIALIZACIÓN ----
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('[App] Inicializando La Esperanza...');
+  
   await cargarDatos();
 
-  // Verificar sesión guardada
+  // ✅ VERIFICAR SESIÓN SEGURA
   const savedUser = localStorage.getItem('la_esperanza_user');
-  if (savedUser) {
+  const token = SessionManager.getToken();
+  
+  if (savedUser && token) {
     try {
-      App.usuarioActual = JSON.parse(savedUser);
+      const user = JSON.parse(savedUser);
+      
+      // Validar que el usuario tenga rol válido
+      if (!['productor', 'comprador'].includes(user.rol)) {
+        throw new Error('Rol inválido');
+      }
+      
+      App.usuarioActual = user;
       cargarHome();
       cargarCatalogo();
       cargarCategoriaSelect();
       renderHistorial();
       cargarPerfil();
       mostrarPantalla('home');
-    } catch {
+      
+      AuditLog.registrar('SESION_RESTAURADA', user.id_usuario, { usuario: user.nombre }, 'info');
+      console.log('[App] Sesión restaurada para:', user.nombre);
+    } catch (err) {
+      console.error('[App] Error restaurando sesión:', err);
+      SessionManager.clearToken();
+      localStorage.removeItem('la_esperanza_user');
       mostrarPantalla('login');
     }
   } else {
@@ -499,6 +597,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('modal-overlay')?.addEventListener('click', (e) => {
     if (e.target === document.getElementById('modal-overlay')) cerrarModal();
   });
+
+  console.log('[App] La Esperanza lista ✅');
 });
 
 // ---- NAVEGACIÓN BOTTOM NAV ----

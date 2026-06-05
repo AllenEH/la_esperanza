@@ -4,14 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#2d6a4f" />
-  <meta name="description" content="Sistema de Gestión y Comercialización La Esperanza - Comunidad Agrícola" />
+  <meta name="description" content="Sistema de Gestión y Comercialización La Esperanza - Plataforma agrícola para comunidades rurales. Conecta productores con compradores locales." />
+  <meta name="keywords" content="agricultura, comercio, Guatemala, productos locales, agrícola, rural, comunidad" />
+  <meta name="author" content="La Esperanza Community" />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="La Esperanza 🌱 - Comercialización Agrícola" />
+  <meta property="og:description" content="Plataforma de compra-venta de productos agrícolas para comunidades rurales" />
+  <meta property="og:url" content="https://usuario.github.io/la-esperanza/" />
+  
+  <!-- Apple Mobile Web App -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>La Esperanza 🌱</title>
+  <meta name="apple-mobile-web-app-title" content="La Esperanza" />
+  
+  <!-- Microsoft -->
+  <meta name="msapplication-TileColor" content="#2d6a4f" />
+  <meta name="msapplication-TileImage" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Crect fill='%232d6a4f' width='144' height='144'/%3E%3Ctext x='72' y='72' font-size='80' fill='%23ffffff' text-anchor='middle' dominant-baseline='middle'%3E🌾%3C/text%3E%3C/svg%3E" />
+  
+  <title>La Esperanza 🌱 - Comercialización Agrícola</title>
+  
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="css/styles.css" />
+  
+  <!-- Manifest para PWA -->
+  <link rel="manifest" href="manifest.json" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='32' y='48' font-size='50' text-anchor='middle'%3E🌾%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%232d6a4f' rx='40' width='180' height='180'/%3E%3Ctext x='90' y='130' font-size='120' fill='%23ffffff' text-anchor='middle'%3E🌾%3C/text%3E%3C/svg%3E" />
+  
   <!-- Preconnect para Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet" />
 </head>
 <body>
 
@@ -494,6 +522,48 @@
 
 </div><!-- /#app -->
 
+<!-- Scripts -->
+<script src="js/security.js"></script>
 <script src="js/app.js"></script>
+
+<!-- Registrar Service Worker (PWA) -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('js/service-worker.js')
+        .then((registration) => {
+          console.log('[PWA] Service Worker registrado exitosamente:', registration);
+          
+          // Chequear actualizaciones cada hora
+          setInterval(() => {
+            registration.update();
+          }, 3600000);
+        })
+        .catch((error) => {
+          console.warn('[PWA] Error al registrar Service Worker:', error);
+        });
+    });
+    
+    // Escuchar actualizaciones
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      console.log('[PWA] Nuevo Service Worker activado');
+      mostrarToast('🔄 Actualización disponible', 'info');
+    });
+  } else {
+    console.log('[PWA] Service Workers no soportados en este navegador');
+  }
+</script>
+
+<!-- Google Analytics (opcional, descomentar con tu ID) -->
+<!-- 
+<script async src="https://www.googletagmanager.com/gtag/js?id=GA_ID"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'GA_ID');
+</script>
+-->
+
 </body>
 </html>
