@@ -3,7 +3,7 @@
    Gestión de estado, datos y navegación
    ============================================ */
 
-const API_BASE_URL = 'http://104.248.233.175:8080/api';
+const API_BASE_URL = 'https://interaction-prisoners-transcripts-elsewhere.trycloudflare.com/api';
 
 // ---- ESTADO GLOBAL ----
 const App = {

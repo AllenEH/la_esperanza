@@ -42,7 +42,8 @@ public class SecurityConfig {
                     config.setAllowedOrigins(List.of(
                             "http://localhost:3000",
                             "http://localhost:5173",
-                            "https://alleneh.github.io"
+                            "https://alleneh.github.io",
+                            "https://interaction-prisoners-transcripts-elsewhere.trycloudflare.com"
                     ));
 
                     config.setAllowedMethods(List.of(
