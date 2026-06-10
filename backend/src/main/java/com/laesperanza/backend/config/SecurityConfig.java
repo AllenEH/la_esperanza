@@ -42,7 +42,7 @@ public class SecurityConfig {
                     config.setAllowedOrigins(List.of(
                             "http://localhost:3000",
                             "http://localhost:5173",
-                            "https://usuario.github.io"
+                            "https://alleneh.github.io"
                     ));
 
                     config.setAllowedMethods(List.of(
@@ -82,6 +82,8 @@ public class SecurityConfig {
                         // CATEGORIAS
                         .requestMatchers(HttpMethod.GET, "/categorias/**")
                         .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/categorias")
+                        .authenticated()  // o .hasRole("ADMIN") si solo admin puede crear
 
                         // PRODUCTOS
                         .requestMatchers(HttpMethod.GET, "/productos/**")
@@ -108,7 +110,10 @@ public class SecurityConfig {
                         .authenticated()
 
                         // CALIFICACIONES
-                        .requestMatchers("/calificaciones/**")
+                        .requestMatchers(HttpMethod.GET, "/calificaciones/**")
+                        .permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/calificaciones/**")
                         .authenticated()
 
                         // ADMIN

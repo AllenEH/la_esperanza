@@ -3,7 +3,7 @@
    Gestión de estado, datos y navegación
    ============================================ */
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://104.248.233.175:8080/api';
 
 // ---- ESTADO GLOBAL ----
 const App = {
@@ -557,7 +557,7 @@ function cargarPerfil() {
 
   document.getElementById('perfil-avatar').textContent = u.foto || '👤';
   document.getElementById('perfil-nombre').textContent = u.nombre;
-  document.getElementById('perfil-rol-badge').textContent = u.rol === 'productor' ? '🌱 Productor' : '🛒 Comprador';
+  document.getElementById('perfil-rol-badge').textContent = u.rol?.toUpperCase() === 'PRODUCTOR' ? '🌱 Productor' : '🛒 Comprador';
   document.getElementById('perfil-tel').textContent = u.telefono;
   document.getElementById('perfil-dpi').textContent = u.dpi ? '****' + u.dpi.slice(-4) : 'No registrado';
 

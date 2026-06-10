@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Productos", description = "Gestión de productos agrícolas")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "https://usuario.github.io"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "https://alleneh.github.io"})
 public class ProductoController {
 
     private final ProductoService productoService;

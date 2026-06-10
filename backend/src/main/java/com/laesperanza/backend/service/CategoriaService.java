@@ -24,4 +24,9 @@ public class CategoriaService {
         log.debug("[CATEGORIA] Listando categorías activas");
         return categoriaRepository.findByActivo(true);
     }
+
+    public Categoria crearCategoria(Categoria categoria) {
+        log.info("[CATEGORIA] Creando categoría: {}", categoria.getNombreCategoria());
+        return categoriaRepository.save(categoria);
+    }
 }

@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Pedidos", description = "Gestión de pedidos y estados")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "https://usuario.github.io"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "https://alleneh.github.io"})
 public class PedidoController {
 
     private final PedidoService pedidoService;
