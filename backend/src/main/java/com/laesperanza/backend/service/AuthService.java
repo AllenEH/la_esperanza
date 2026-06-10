@@ -10,8 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.math.BigDecimal;
 
 /**
  * Servicio de Autenticación
@@ -109,7 +112,7 @@ public class AuthService {
             .email(request.getEmail())
             .dpi(request.getDpi())
             .rol(rol)
-            .reputacion(5.0)
+            .reputacion(BigDecimal.valueOf(5.0))
             .activo(true)
             .foto(rol == RolUsuario.PRODUCTOR ? "👩‍🌾" : "👤")
             .build();

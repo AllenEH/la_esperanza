@@ -25,14 +25,16 @@ public class Producto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_producto")
     private Long idProducto;
+
 
     @Column(nullable = false, length = 100)
     @NotBlank(message = "Nombre es requerido")
     @Size(min = 3, max = 100, message = "Nombre debe tener entre 3 y 100 caracteres")
     private String nombre;
 
-    @Column(length = 2)
+    @Column(length = 255)
     private String imagen;
 
     @Column(nullable = false, precision = 10, scale = 2)
@@ -55,13 +57,13 @@ public class Producto {
     @Column(nullable = false)
     private Boolean activo = true;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime fechaPublicacion = LocalDateTime.now();
+    @Column(name = "fecha_publicacion", nullable = false, updatable = false)
+    private LocalDateTime fechaPublicacion;
 
-    @Column
+    @Column(name = "fecha_modificacion")
     private LocalDateTime fechaModificacion;
 
-    @Column
+    @Column(name = "fecha_eliminacion")
     private LocalDateTime fechaEliminacion;
 
     // Relaciones

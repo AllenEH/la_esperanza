@@ -11,8 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 /**
  * Servicio para Calificaciones
@@ -49,12 +51,14 @@ public class CalificacionService {
 
         calificacionRepository.save(calificacion);
 
-        Double promedio = calificacionRepository.obtenerPromedioCalificaciones(usuarioCalificado.getIdUsuario());
+       Double promedio = calificacionRepository.obtenerPromedioCalificaciones(
+            usuarioCalificado.getIdUsuario()
+        );
+
         if (promedio != null) {
-            usuarioCalificado.setReputacion(promedio);
+            usuarioCalificado.setReputacion(BigDecimal.valueOf(promedio));
             usuarioRepository.save(usuarioCalificado);
         }
-
         auditoriaService.registrarIntento("CALIFICACION_CREADA", calificadorId.toString(), "Calificó a " + usuarioCalificado.getNombre());
     }
 

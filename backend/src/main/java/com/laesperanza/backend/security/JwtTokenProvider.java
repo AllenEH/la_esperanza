@@ -1,12 +1,19 @@
 package com.laesperanza.backend.security;
 
-import io.jsonwebtoken.*;
+import com.laesperanza.backend.entity.Usuario;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import com.laesperanza.backend.entity.Usuario;
+
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
@@ -27,8 +34,7 @@ public class JwtTokenProvider {
     private long refreshExpirationMs;
 
     private SecretKey getSigningKey() {
-        byte[] decodedKey = jwtSecret.getBytes();
-        return Keys.hmacShaKeyFor(decodedKey);
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -39,7 +45,7 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Generar refresh token (larga duración)
+     * Generar refresh token
      */
     public String generateRefreshToken(Usuario usuario) {
         return createToken(usuario, refreshExpirationMs);
@@ -49,19 +55,25 @@ public class JwtTokenProvider {
      * Crear token JWT
      */
     private String createToken(Usuario usuario, long expirationTime) {
+
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationTime);
 
         return Jwts.builder()
-            .subject(usuario.getIdUsuario().toString())
-            .claim("nombre", usuario.getNombre())
-            .claim("email", usuario.getEmail())
-            .claim("rol", usuario.getRol().toString())
-            .claim("telefono", usuario.getTelefono().substring(0, 3) + "***") // No guardar teléfono completo
-            .issuedAt(now)
-            .expiration(expiryDate)
-            .signWith(getSigningKey(), SignatureAlgorithm.HS512)
-            .compact();
+                .subject(usuario.getIdUsuario().toString())
+                .claim("nombre", usuario.getNombre())
+                .claim("email", usuario.getEmail())
+                .claim("rol", usuario.getRol().toString())
+                .claim(
+                        "telefono",
+                        usuario.getTelefono() != null && usuario.getTelefono().length() >= 3
+                                ? usuario.getTelefono().substring(0, 3) + "***"
+                                : "***"
+                )
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(getSigningKey())
+                .compact();
     }
 
     /**
@@ -77,7 +89,7 @@ public class JwtTokenProvider {
      */
     public String getNombreFromToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
-        return (String) claims.get("nombre");
+        return claims.get("nombre", String.class);
     }
 
     /**
@@ -85,41 +97,56 @@ public class JwtTokenProvider {
      */
     public String getRolFromToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
-        return (String) claims.get("rol");
+        return claims.get("rol", String.class);
     }
 
     /**
      * Obtener todos los claims del token
      */
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parserBuilder()
-            .setSigningKey(getSigningKey())
-            .build()
-            .parseClaimsJws(token)
-            .getPayload();
+
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     /**
      * Validar token JWT
      */
     public boolean validateToken(String token) {
+
         try {
-            Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token);
+
+            Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token);
+
             return true;
+
         } catch (MalformedJwtException ex) {
+
             log.error("[JWT] Token JWT inválido: {}", ex.getMessage());
+
         } catch (ExpiredJwtException ex) {
+
             log.error("[JWT] Token JWT expirado: {}", ex.getMessage());
+
         } catch (UnsupportedJwtException ex) {
+
             log.error("[JWT] Token JWT no soportado: {}", ex.getMessage());
+
         } catch (IllegalArgumentException ex) {
-            log.error("[JWT] JWT claims vacío: {}", ex.getMessage());
-        } catch (SignatureException ex) {
-            log.error("[JWT] Firma JWT inválida: {}", ex.getMessage());
+
+            log.error("[JWT] JWT vacío: {}", ex.getMessage());
+
+        } catch (JwtException ex) {
+
+            log.error("[JWT] Error de firma JWT: {}", ex.getMessage());
         }
+
         return false;
     }
 
@@ -127,10 +154,14 @@ public class JwtTokenProvider {
      * Verificar si el token está expirado
      */
     public boolean isTokenExpired(String token) {
+
         try {
+
             Claims claims = getAllClaimsFromToken(token);
             return claims.getExpiration().before(new Date());
-        } catch (ExpiredJwtException e) {
+
+        } catch (ExpiredJwtException ex) {
+
             return true;
         }
     }

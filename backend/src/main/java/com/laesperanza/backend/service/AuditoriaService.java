@@ -1,11 +1,13 @@
 package com.laesperanza.backend.service;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Servicio de Auditoría
@@ -23,14 +25,14 @@ public class AuditoriaService {
      * Registrar intento de autenticación/acción
      */
     public void registrarIntento(String accion, String usuarioId, String detalles) {
-        AuditoriaLog log = AuditoriaLog.builder()
+        AuditoriaLog auditoriaLog = AuditoriaLog.builder()
             .timestamp(LocalDateTime.now())
             .accion(accion)
             .usuarioId(usuarioId)
             .detalles(detalles)
             .build();
 
-        logs.add(log);
+        logs.add(auditoriaLog);
 
         // Mantener últimos N logs en memoria
         if (logs.size() > MAX_LOGS) {
@@ -58,6 +60,7 @@ public class AuditoriaService {
             .toList();
     }
 
+    @Data
     public static class AuditoriaLog {
         public LocalDateTime timestamp;
         public String accion;

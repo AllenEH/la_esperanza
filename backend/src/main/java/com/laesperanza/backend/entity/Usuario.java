@@ -5,6 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
 
 /**
  * Entidad Usuario - Productor o Comprador
@@ -42,8 +43,8 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     private RolUsuario rol;
 
-    @Column(nullable = false)
-    private Double reputacion = 5.0;
+    @Column(nullable = false, precision = 5, scale = 2)
+    private BigDecimal reputacion = BigDecimal.valueOf(5.0);
 
     @Column(length = 50)
     private String foto;
@@ -76,7 +77,7 @@ public class Usuario {
     @PrePersist
     protected void onCreate() {
         this.fechaRegistro = LocalDateTime.now();
-        this.reputacion = 5.0;
+        this.reputacion = BigDecimal.valueOf(5.0);
         this.activo = true;
     }
 

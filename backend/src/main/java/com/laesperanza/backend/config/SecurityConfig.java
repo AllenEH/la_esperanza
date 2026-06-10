@@ -15,11 +15,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
-/**
- * Configuración de Seguridad Spring Security con JWT
- * Cumple con OWASP Top 10
- */
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -29,68 +28,101 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
-            // ✅ OWASP: Deshabilitar sesiones (stateless)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf.disable())
 
-            // ✅ OWASP A1: CSRF deshabilitado (API stateless no necesita CSRF)
-            .csrf(csrf -> csrf.disable())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            // ✅ OWASP A7: Configuración de CORS
-            .cors(cors -> cors.configurationSource(request -> {
-                var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-                corsConfig.setAllowedOrigins(java.util.Arrays.asList(
-                    "http://localhost:3000",
-                    "http://localhost:5173",
-                    "https://usuario.github.io"
-                ));
-                corsConfig.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-                corsConfig.setAllowedHeaders(java.util.Arrays.asList("*"));
-                corsConfig.setAllowCredentials(true);
-                corsConfig.setMaxAge(3600L);
-                return corsConfig;
-            }))
+                .cors(cors -> cors.configurationSource(request -> {
 
-            // ✅ Configurar autorización de endpoints
-            .authorizeHttpRequests(authz -> authz
-                // Públicos (login, registro, documentación)
-                .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/registrar").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                .requestMatchers("/actuator/health").permitAll()
+                    CorsConfiguration config = new CorsConfiguration();
 
-                // Productos: GET público, POST/PUT/DELETE requieren autenticación
-                .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/productos").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/productos/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/productos/**").authenticated()
+                    config.setAllowedOrigins(List.of(
+                            "http://localhost:3000",
+                            "http://localhost:5173",
+                            "https://usuario.github.io"
+                    ));
 
-                // Pedidos: Requieren autenticación
-                .requestMatchers("/pedidos/**").authenticated()
+                    config.setAllowedMethods(List.of(
+                            "GET",
+                            "POST",
+                            "PUT",
+                            "DELETE",
+                            "PATCH",
+                            "OPTIONS"
+                    ));
 
-                // Usuarios: GET público (perfil), el resto requiere autenticación
-                .requestMatchers(HttpMethod.GET, "/usuarios/**").permitAll()
-                .requestMatchers(HttpMethod.PUT, "/usuarios/**").authenticated()
+                    config.setAllowedHeaders(List.of("*"));
+                    config.setAllowCredentials(true);
 
-                // Calificaciones: Requieren autenticación
-                .requestMatchers("/calificaciones/**").authenticated()
+                    return config;
+                }))
 
-                // Admin
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .authorizeHttpRequests(auth -> auth
 
-                // Lo demás requiere autenticación
-                .anyRequest().authenticated()
-            )
+                        // AUTH
+                        .requestMatchers(
+                                "/auth/login",
+                                "/auth/registrar"
+                        ).permitAll()
 
-            // ✅ Headers de seguridad
-            .headers(headers -> headers
-                .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
-                .xssProtection(xss -> xss.enable())
-                .frameOptions(frameOptions -> frameOptions.sameOrigin())
-            )
+                        // SWAGGER
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
 
-            // Agregar filtro JWT
-            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                UsernamePasswordAuthenticationFilter.class);
+                        // ACTUATOR
+                        .requestMatchers("/actuator/health")
+                        .permitAll()
+
+                        // CATEGORIAS
+                        .requestMatchers(HttpMethod.GET, "/categorias/**")
+                        .permitAll()
+
+                        // PRODUCTOS
+                        .requestMatchers(HttpMethod.GET, "/productos/**")
+                        .permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/productos")
+                        .authenticated()
+
+                        .requestMatchers(HttpMethod.PUT, "/productos/**")
+                        .authenticated()
+
+                        .requestMatchers(HttpMethod.DELETE, "/productos/**")
+                        .authenticated()
+
+                        // USUARIOS
+                        .requestMatchers(HttpMethod.GET, "/usuarios/**")
+                        .permitAll()
+
+                        .requestMatchers(HttpMethod.PUT, "/usuarios/**")
+                        .authenticated()
+
+                        // PEDIDOS
+                        .requestMatchers("/pedidos/**")
+                        .authenticated()
+
+                        // CALIFICACIONES
+                        .requestMatchers("/calificaciones/**")
+                        .authenticated()
+
+                        // ADMIN
+                        .requestMatchers("/admin/**")
+                        .hasRole("ADMIN")
+
+                        .anyRequest()
+                        .authenticated()
+                )
+
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtTokenProvider),
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
@@ -101,7 +133,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration configuration
+    ) throws Exception {
+
+        return configuration.getAuthenticationManager();
     }
 }
