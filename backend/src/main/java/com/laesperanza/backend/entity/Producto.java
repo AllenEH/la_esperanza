@@ -86,4 +86,6 @@ public class Producto {
     protected void onUpdate() {
         this.fechaModificacion = LocalDateTime.now();
     }
+
+    
 }

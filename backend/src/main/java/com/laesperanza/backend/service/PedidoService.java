@@ -68,6 +68,14 @@ public class PedidoService {
             .collect(Collectors.toList());
     }
 
+    // ← NUEVO: Pedidos recibidos por el productor
+    public List<PedidoResponse> obtenerPedidosPorProductor(Long idProductor) {
+        log.info("[PEDIDO] Obteniendo pedidos recibidos para productor {}", idProductor);
+        return pedidoRepository.findPedidosByProductor(idProductor).stream()
+            .map(this::convertirAResponse)
+            .collect(Collectors.toList());
+    }
+
     public PedidoResponse cambiarEstadoPedido(Long idUsuario, Long idPedido, String nuevoEstado) {
         log.info("[PEDIDO] Usuario {} cambia estado de pedido {} a {}", idUsuario, idPedido, nuevoEstado);
 

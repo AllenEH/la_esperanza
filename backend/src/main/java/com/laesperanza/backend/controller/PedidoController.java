@@ -23,7 +23,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Pedidos", description = "Gestión de pedidos y estados")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "https://alleneh.github.io","https://sistema-la-esperanza.online","https://www.sistema-la-esperanza.online"})
+@CrossOrigin(origins = {
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://alleneh.github.io",
+    "https://sistema-la-esperanza.online",
+    "https://www.sistema-la-esperanza.online"
+})
 public class PedidoController {
 
     private final PedidoService pedidoService;
@@ -43,13 +49,23 @@ public class PedidoController {
     }
 
     @GetMapping("/mis-pedidos")
-    @Operation(summary = "Historial de pedidos", description = "Obtiene los pedidos del usuario autenticado")
+    @Operation(summary = "Historial de pedidos del comprador", description = "Obtiene los pedidos realizados por el usuario autenticado")
     public ResponseEntity<List<PedidoResponse>> obtenerMisPedidos(
             @RequestHeader("Authorization") String bearerToken) {
         log.info("[API] GET /pedidos/mis-pedidos");
         String token = bearerToken.substring(7);
         Long idUsuario = jwtTokenProvider.getUserIdFromToken(token);
         return ResponseEntity.ok(pedidoService.obtenerHistorialUsuario(idUsuario));
+    }
+
+    @GetMapping("/mis-productos-pedidos")
+    @Operation(summary = "Pedidos recibidos por el productor", description = "Obtiene los pedidos realizados a los productos del productor autenticado")
+    public ResponseEntity<List<PedidoResponse>> obtenerPedidosMisProductos(
+            @RequestHeader("Authorization") String bearerToken) {
+        log.info("[API] GET /pedidos/mis-productos-pedidos");
+        String token = bearerToken.substring(7);
+        Long idUsuario = jwtTokenProvider.getUserIdFromToken(token);
+        return ResponseEntity.ok(pedidoService.obtenerPedidosPorProductor(idUsuario));
     }
 
     @PutMapping("/{idPedido}/estado")

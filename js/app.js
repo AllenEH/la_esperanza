@@ -118,6 +118,12 @@ async function cargarHistorialBackend() {
   try {
     const pedidos = await apiFetch('/pedidos/mis-pedidos');
     App.db.pedidos = pedidos;
+ 
+    // Si es productor, también carga los pedidos recibidos
+    if (App.usuarioActual.rol?.toUpperCase() === 'PRODUCTOR') {
+      const pedidosRecibidos = await apiFetch('/pedidos/mis-productos-pedidos');
+      App.db.pedidosRecibidos = pedidosRecibidos;
+    }
   } catch (e) {
     console.warn('[App] No se pudo cargar historial de pedidos', e);
   }
@@ -508,18 +514,117 @@ function simularSubirFoto() {
 function renderHistorial() {
   const contenedor = document.getElementById('historial-lista');
   if (!contenedor || !App.db || !App.usuarioActual) return;
-
-  const pedidos = App.db.pedidos.filter(p => p.idUsuario === App.usuarioActual.idUsuario);
-
-  if (pedidos.length === 0) {
-    contenedor.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📋</div>
-        <div class="empty-title">Sin pedidos aún</div>
-        <div class="empty-desc">¡Solicita productos del catálogo!</div>
-      </div>`;
-    return;
+ 
+  const esProductor = App.usuarioActual.rol?.toUpperCase() === 'PRODUCTOR';
+ 
+  const estadoConfig = {
+    'Pendiente': { clase: 'pendiente', icono: '⏳' },
+    'Aceptado':  { clase: 'aceptado',  icono: '✅' },
+    'Rechazado': { clase: 'rechazado', icono: '❌' },
+    'Entregado': { clase: 'entregado', icono: '📦' },
+    'Cancelado': { clase: 'rechazado', icono: '🚫' }
+  };
+ 
+  if (esProductor) {
+    // ── VISTA PRODUCTOR: pedidos recibidos con botones de acción ──
+    const pedidosRecibidos = App.db.pedidosRecibidos || [];
+ 
+    if (pedidosRecibidos.length === 0) {
+      contenedor.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">Sin pedidos recibidos</div>
+          <div class="empty-desc">Cuando un comprador solicite tus productos aparecerán aquí</div>
+        </div>`;
+      return;
+    }
+ 
+    contenedor.innerHTML = pedidosRecibidos.map((ped, i) => {
+      const est = estadoConfig[ped.estado] || { clase: 'pendiente', icono: '⏳' };
+      const esPendiente = ped.estado === 'Pendiente';
+      const esAceptado  = ped.estado === 'Aceptado';
+ 
+      return `
+        <div class="order-card" style="animation-delay:${i * 0.07}s">
+          <div class="order-emoji">🌾</div>
+          <div class="order-details" style="flex:1">
+            <div class="order-name">${ped.nombreProducto}</div>
+            <div class="order-date">📅 ${formatFecha(ped.fechaPedido)} · 📦 Cant: ${ped.cantidadPedida}</div>
+            ${ped.comentario ? `<div class="order-date">💬 ${ped.comentario}</div>` : ''}
+            <span class="status-badge ${est.clase}">${est.icono} ${ped.estado}</span>
+            ${esPendiente ? `
+              <div style="margin-top:8px;display:flex;gap:8px">
+                <button onclick="cambiarEstadoPedido(${ped.idPedido},'ACEPTADO')"
+                  style="flex:1;padding:8px;background:#2d6a4f;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">
+                  ✅ Aceptar
+                </button>
+                <button onclick="cambiarEstadoPedido(${ped.idPedido},'RECHAZADO')"
+                  style="flex:1;padding:8px;background:#e63946;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">
+                  ❌ Rechazar
+                </button>
+              </div>` : ''}
+            ${esAceptado ? `
+              <div style="margin-top:8px">
+                <button onclick="cambiarEstadoPedido(${ped.idPedido},'ENTREGADO')"
+                  style="width:100%;padding:8px;background:#457b9d;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">
+                  📦 Marcar como Entregado
+                </button>
+              </div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+ 
+  } else {
+    // ── VISTA COMPRADOR: historial de pedidos realizados ──
+    const pedidos = App.db.pedidos || [];
+ 
+    if (pedidos.length === 0) {
+      contenedor.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">Sin pedidos aún</div>
+          <div class="empty-desc">¡Solicita productos del catálogo!</div>
+        </div>`;
+      return;
+    }
+ 
+    contenedor.innerHTML = pedidos.slice().reverse().map((ped, i) => {
+      const prod = App.db.productos.find(p => p.idProducto === ped.idProducto);
+      const prodNombre = prod ? prod.nombre : ped.nombreProducto || 'Producto';
+      const prodEmoji  = prod ? prod.imagen : '🌾';
+      const est = estadoConfig[ped.estado] || { clase: 'pendiente', icono: '⏳' };
+ 
+      return `
+        <div class="order-card" style="animation-delay:${i * 0.07}s">
+          <div class="order-emoji">${prodEmoji}</div>
+          <div class="order-details">
+            <div class="order-name">${prodNombre}</div>
+            <div class="order-date">📅 ${formatFecha(ped.fechaPedido || ped.fecha)} · 📦 Cant: ${ped.cantidadPedida || ped.cantidad_pedida}</div>
+            <span class="status-badge ${est.clase}">${est.icono} ${ped.estado}</span>
+          </div>
+        </div>`;
+    }).join('');
   }
+}
+ 
+// ---- NUEVA función para que el productor cambie estado ----
+async function cambiarEstadoPedido(idPedido, nuevoEstado) {
+  try {
+    const pedidoActualizado = await apiFetch(`/pedidos/${idPedido}/estado?estado=${nuevoEstado}`, {
+      method: 'PUT'
+    });
+ 
+    // Actualizar en memoria
+    const idx = App.db.pedidosRecibidos.findIndex(p => p.idPedido === idPedido);
+    if (idx !== -1) App.db.pedidosRecibidos[idx] = pedidoActualizado;
+ 
+    const labels = { ACEPTADO: 'Aceptado ✅', RECHAZADO: 'Rechazado ❌', ENTREGADO: 'Entregado 📦' };
+    mostrarToast(`Pedido ${labels[nuevoEstado] || nuevoEstado}`);
+    renderHistorial();
+  } catch (err) {
+    mostrarToast('❌ Error: ' + err.message, 'error');
+  }
+}
 
   const estadoConfig = {
     'Pendiente': { clase: 'pendiente', icono: '⏳' },
