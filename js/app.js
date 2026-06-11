@@ -3,7 +3,9 @@
    Gestión de estado, datos y navegación
    ============================================ */
 
-const API_BASE_URL = 'https://sistema-la-esperanza.online/api';
+const API_BASE_URL = window.location.hostname === 'sistema-la-esperanza.online' 
+    ? '/api'
+    : 'https://sistema-la-esperanza.online/api';
 
 // ---- ESTADO GLOBAL ----
 const App = {
