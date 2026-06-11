@@ -43,7 +43,7 @@ public class SecurityConfig {
                             "http://localhost:3000",
                             "http://localhost:5173",
                             "https://alleneh.github.io",
-                            "https://interaction-prisoners-transcripts-elsewhere.trycloudflare.com"
+                            "https://web-collapse-assured-periods.trycloudflare.com"
                     ));
 
                     config.setAllowedMethods(List.of(
