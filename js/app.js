@@ -626,32 +626,6 @@ async function cambiarEstadoPedido(idPedido, nuevoEstado) {
   }
 }
 
-  const estadoConfig = {
-    'Pendiente': { clase: 'pendiente', icono: '⏳' },
-    'Aceptado': { clase: 'aceptado', icono: '✅' },
-    'Rechazado': { clase: 'rechazado', icono: '❌' },
-    'Entregado': { clase: 'entregado', icono: '📦' },
-    'Cancelado': { clase: 'rechazado', icono: '🚫' }
-  };
-
-  contenedor.innerHTML = pedidos.slice().reverse().map((ped, i) => {
-    const prod = App.db.productos.find(p => p.idProducto === ped.idProducto);
-    const prodNombre = prod ? prod.nombre : ped.nombreProducto || 'Producto';
-    const prodEmoji = prod ? prod.imagen : '🌾';
-    const est = estadoConfig[ped.estado] || { clase: 'pendiente', icono: '⏳' };
-
-    return `
-      <div class="order-card" style="animation-delay:${i * 0.07}s">
-        <div class="order-emoji">${prodEmoji}</div>
-        <div class="order-details">
-          <div class="order-name">${prodNombre}</div>
-          <div class="order-date">📅 ${formatFecha(ped.fechaPedido || ped.fecha)} · 📦 Cant: ${ped.cantidadPedida || ped.cantidad_pedida}</div>
-          <span class="status-badge ${est.clase}">${est.icono} ${ped.estado}</span>
-        </div>
-      </div>`;
-  }).join('');
-}
-
 function formatFecha(fecha) {
   const d = new Date(fecha + 'T12:00:00');
   return d.toLocaleDateString('es-GT', { day: '2-digit', month: 'short', year: 'numeric' });
