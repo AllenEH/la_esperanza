@@ -43,7 +43,8 @@ public class SecurityConfig {
                             "http://localhost:3000",
                             "http://localhost:5173",
                             "https://alleneh.github.io",
-                            "https://web-collapse-assured-periods.trycloudflare.com"
+                            "https://sistema-la-esperanza.online",
+                            "https://www.sistema-la-esperanza.online"
                     ));
 
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

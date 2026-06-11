@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Autenticación", description = "Endpoints de login y registro")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "https://alleneh.github.io"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "https://alleneh.github.io","https://sistema-la-esperanza.online","https://www.sistema-la-esperanza.online"})
 public class AuthController {
 
     private final AuthService authService;
