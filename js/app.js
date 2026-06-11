@@ -22,7 +22,6 @@ const App = {
 async function apiFetch(path, options = {}) {
   const headers = {
     'Content-Type': 'application/json',
-    'CF-Access-Client-Id': 'bypass',
     ...(options.headers || {})
   };
 
